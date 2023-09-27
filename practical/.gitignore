@@ -1,0 +1,17 @@
+# Exclude router images and other large binary files
+*.qcow2
+*.bin
+*.iso
+
+# Exclude temporary files
+*.tmp
+
+# Exclude GNS3 project backups
+*.gns3project.backup
+
+# Others
+router_images/*
+
+# Gns3 projects
+class_1/intro/*
+class_2_3/bgp_intro/*
