@@ -1,0 +1,66 @@
+Sep 27 22:39:51.926 HYPERVISOR: Release 0.2.23-amd64/Linux (tag 2023010200)
+Sep 27 22:39:51.926 HYPERVISOR: Started on IP = 127.0.0.1, TCP port = 54085.
+Sep 27 22:39:51.934 HYPERVISOR: exec_cmd: hypervisor version 
+Sep 27 22:39:51.935 HYPERVISOR: exec_cmd: hypervisor working_dir /home/goncalo/repos/communication_architecture/practical/class_2_3/bgp_intro/project-files/dynamips 
+Sep 27 22:39:51.935 GENERAL: working_dir=/home/goncalo/repos/communication_architecture/practical/class_2_3/bgp_intro/project-files/dynamips
+Sep 27 22:39:51.935 HYPERVISOR: exec_cmd: hypervisor working_dir /home/goncalo/repos/communication_architecture/practical/class_2_3/bgp_intro/project-files/dynamips/1ff2aae3-5b5a-43bc-9d96-7e0e34d96129 
+Sep 27 22:39:51.935 GENERAL: working_dir=/home/goncalo/repos/communication_architecture/practical/class_2_3/bgp_intro/project-files/dynamips/1ff2aae3-5b5a-43bc-9d96-7e0e34d96129
+Sep 27 22:39:51.935 HYPERVISOR: exec_cmd: vm create R3 3 c7200 
+Sep 27 22:39:51.935 VM: VM R3 created.
+Sep 27 22:39:51.935 HYPERVISOR: exec_cmd: vm set_con_tcp_port R3 5003 
+Sep 27 22:39:51.935 HYPERVISOR: exec_cmd: c7200 get_mac_addr R3 
+Sep 27 22:39:51.935 HYPERVISOR: exec_cmd: vm get_status R3 
+Sep 27 22:39:51.935 HYPERVISOR: exec_cmd: vm slot_add_binding R3 0 0 C7200-IO-FE 
+Sep 27 22:39:51.936 HYPERVISOR: exec_cmd: vm set_disk0 R3 0 
+Sep 27 22:39:51.936 HYPERVISOR: exec_cmd: vm get_status R3 
+Sep 27 22:39:51.936 HYPERVISOR: exec_cmd: vm set_idle_pc R3 0x60608040 
+Sep 27 22:39:51.936 HYPERVISOR: exec_cmd: vm set_ios R3 /home/goncalo/GNS3/images/IOS/c7200-adventerprisek9-mz.151-4.M2.image 
+Sep 27 22:39:51.936 HYPERVISOR: exec_cmd: c7200 set_mac_addr R3 ca03.7a72.0000 
+Sep 27 22:39:51.936 HYPERVISOR: exec_cmd: vm set_nvram R3 512 
+Sep 27 22:39:51.936 HYPERVISOR: exec_cmd: vm set_ram R3 512 
+Sep 27 22:39:51.937 HYPERVISOR: exec_cmd: vm get_status R3 
+Sep 27 22:39:51.937 HYPERVISOR: exec_cmd: vm slot_remove_binding R3 0 0 
+Sep 27 22:39:51.937 HYPERVISOR: exec_cmd: vm get_status R3 
+Sep 27 22:39:51.937 HYPERVISOR: exec_cmd: vm slot_add_binding R3 0 0 C7200-IO-2FE 
+Sep 27 22:39:51.937 HYPERVISOR: exec_cmd: vm get_status R3 
+Sep 27 22:39:51.937 HYPERVISOR: exec_cmd: vm slot_add_binding R3 1 0 PA-2FE-TX 
+Sep 27 22:39:52.755 HYPERVISOR: exec_cmd: nio create_udp udp-a6cd44fa-3c10-4c42-9b47-bba96ba98904 10020 127.0.0.1 10021 
+Sep 27 22:39:52.963 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R3 0 1 udp-a6cd44fa-3c10-4c42-9b47-bba96ba98904 
+Sep 27 22:39:52.964 HYPERVISOR: exec_cmd: vm get_status R3 
+Sep 27 22:39:53.002 HYPERVISOR: exec_cmd: nio create_udp udp-b6ae1e1d-7a04-4d2a-bdc6-e1554b3a4cea 10024 127.0.0.1 10025 
+Sep 27 22:39:53.003 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R3 1 0 udp-b6ae1e1d-7a04-4d2a-bdc6-e1554b3a4cea 
+Sep 27 22:39:53.003 HYPERVISOR: exec_cmd: vm get_status R3 
+Sep 27 22:39:53.070 HYPERVISOR: exec_cmd: nio create_udp udp-22fb4872-1916-47a0-a9fb-837dc7b56d22 10028 127.0.0.1 10029 
+Sep 27 22:39:53.071 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R3 0 0 udp-22fb4872-1916-47a0-a9fb-837dc7b56d22 
+Sep 27 22:39:53.072 HYPERVISOR: exec_cmd: vm get_status R3 
+Sep 27 22:40:12.747 HYPERVISOR: exec_cmd: vm set_ghost_status R3 2 
+Sep 27 22:40:12.748 HYPERVISOR: exec_cmd: vm set_ghost_file R3 /home/goncalo/repos/communication_architecture/practical/class_2_3/bgp_intro/project-files/dynamips/c7200-adventerprisek9-mz.151-4.M2.image-512.ghost 
+Sep 27 22:40:12.748 HYPERVISOR: exec_cmd: vm get_status R3 
+Sep 27 22:40:12.748 HYPERVISOR: exec_cmd: vm set_config R3 configs/i3_startup-config.cfg 
+Sep 27 22:40:12.748 HYPERVISOR: exec_cmd: vm start R3 
+Sep 27 22:40:42.959 HYPERVISOR: exec_cmd: vm extract_config R3 
+Sep 27 22:45:38.226 HYPERVISOR: exec_cmd: vm get_status R3 
+Sep 27 22:45:38.226 HYPERVISOR: exec_cmd: vm stop R3 
+Sep 27 22:45:38.359 VM: VM R3 shutdown.
+Sep 27 22:45:38.360 HYPERVISOR: exec_cmd: vm extract_config R3 
+Sep 27 22:45:48.645 HYPERVISOR: exec_cmd: vm set_ios R3 /home/goncalo/GNS3/images/IOS/c7200-adventerprisek9-mz.151-4.M2.image 
+Sep 27 22:45:48.646 HYPERVISOR: exec_cmd: vm rename R3 R2B 
+Sep 27 22:45:48.707 HYPERVISOR: exec_cmd: vm set_ios R2B /home/goncalo/GNS3/images/IOS/c7200-adventerprisek9-mz.151-4.M2.image 
+Sep 27 22:45:51.412 HYPERVISOR: exec_cmd: vm set_ghost_status R2B 2 
+Sep 27 22:45:51.413 HYPERVISOR: exec_cmd: vm set_ghost_file R2B /home/goncalo/repos/communication_architecture/practical/class_2_3/bgp_intro/project-files/dynamips/c7200-adventerprisek9-mz.151-4.M2.image-512.ghost 
+Sep 27 22:45:51.413 HYPERVISOR: exec_cmd: vm get_status R2B 
+Sep 27 22:45:51.413 HYPERVISOR: exec_cmd: vm set_config R2B configs/i3_startup-config.cfg 
+Sep 27 22:45:51.414 HYPERVISOR: exec_cmd: vm start R2B 
+Sep 27 22:47:31.137 HYPERVISOR: exec_cmd: vm get_status R2B 
+Sep 27 22:47:31.137 HYPERVISOR: exec_cmd: vm stop R2B 
+Sep 27 22:47:31.256 VM: VM R2B shutdown.
+Sep 27 22:47:31.257 HYPERVISOR: exec_cmd: vm extract_config R2B 
+Sep 27 22:47:33.484 HYPERVISOR: exec_cmd: vm get_status R2B 
+Sep 27 22:47:33.485 HYPERVISOR: exec_cmd: vm extract_config R2B 
+Sep 27 22:47:33.806 HYPERVISOR: exec_cmd: vm get_status R2B 
+Sep 27 22:47:33.806 HYPERVISOR: exec_cmd: vm extract_config R2B 
+Sep 27 22:47:33.807 HYPERVISOR: exec_cmd: vm delete R2B 
+Sep 27 22:47:33.807 VM: VM R2B destroyed.
+Sep 27 22:47:33.807 HYPERVISOR: exec_cmd: hypervisor stop 
+Sep 27 22:47:33.892 HYPERVISOR: Stopped.
+Sep 27 22:47:33.892 GENERAL: reset done.
