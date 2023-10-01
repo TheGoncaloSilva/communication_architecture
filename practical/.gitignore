@@ -13,5 +13,12 @@
 router_images/*
 
 # Gns3 projects
-class_1/intro/*
-class_2_3/bgp_intro/*
+#class_1/intro/*
+#class_2_3/bgp_intro/*
+
+# Ignore all files and directories except *.gns3 and *.cfg files
+!.gitignore
+!/*.gns3
+!/*.cfg
+
+
