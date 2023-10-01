@@ -2,6 +2,8 @@
 *.qcow2
 *.bin
 *.iso
+*.ghost
+*ilt_*
 
 # Exclude temporary files
 *.tmp

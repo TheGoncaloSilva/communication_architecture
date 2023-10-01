@@ -75,7 +75,7 @@
                 "drawing_id": "f4d3a214-3a80-4b46-8303-67b3100de806",
                 "locked": false,
                 "rotation": 0,
-                "svg": "<svg width=\"385\" height=\"715\"><rect width=\"385\" height=\"715\" rx=\"3\" ry=\"3\" fill=\"#c0bfbc\" fill-opacity=\"1.0\" stroke-width=\"2\" stroke=\"#5e5c64\" /></svg>",
+                "svg": "<svg width=\"381\" height=\"715\"><rect width=\"381\" height=\"715\" rx=\"3\" ry=\"3\" fill=\"#c0bfbc\" fill-opacity=\"1.0\" stroke-width=\"2\" stroke=\"#5e5c64\" /></svg>",
                 "x": 450,
                 "y": -428,
                 "z": 0
@@ -93,9 +93,9 @@
                 "drawing_id": "3cdb5a0b-4cff-4f23-8ca2-232d41e1ae9c",
                 "locked": false,
                 "rotation": 0,
-                "svg": "<svg width=\"123\" height=\"42\"><text font-family=\"TypeWriter\" font-size=\"10.0\" font-weight=\"bold\" fill=\"#000000\" fill-opacity=\"1.0\">200.20.20.0/24\n2001:20:20::/64</text></svg>",
-                "x": 525,
-                "y": -65,
+                "svg": "<svg width=\"123\" height=\"59\"><text font-family=\"TypeWriter\" font-size=\"10.0\" font-weight=\"bold\" fill=\"#000000\" fill-opacity=\"1.0\">192.168.1.0/24\n200.20.20.0/24\n2001:20:20::/64</text></svg>",
+                "x": 530,
+                "y": -84,
                 "z": 2
             },
             {
@@ -477,7 +477,7 @@
         "nodes": [
             {
                 "compute_id": "local",
-                "console": 5000,
+                "console": 5015,
                 "console_auto_start": false,
                 "console_type": "none",
                 "custom_adapters": [],
@@ -557,7 +557,7 @@
             },
             {
                 "compute_id": "local",
-                "console": 5001,
+                "console": 5016,
                 "console_auto_start": false,
                 "console_type": "telnet",
                 "custom_adapters": [],
@@ -626,7 +626,7 @@
             },
             {
                 "compute_id": "local",
-                "console": 5002,
+                "console": 5017,
                 "console_auto_start": false,
                 "console_type": "telnet",
                 "custom_adapters": [],
@@ -695,7 +695,7 @@
             },
             {
                 "compute_id": "local",
-                "console": 5003,
+                "console": 5018,
                 "console_auto_start": false,
                 "console_type": "telnet",
                 "custom_adapters": [],
@@ -764,7 +764,7 @@
             },
             {
                 "compute_id": "local",
-                "console": 5004,
+                "console": 5019,
                 "console_auto_start": false,
                 "console_type": "telnet",
                 "custom_adapters": [],
@@ -833,7 +833,7 @@
             },
             {
                 "compute_id": "local",
-                "console": 5005,
+                "console": 5020,
                 "console_auto_start": false,
                 "console_type": "none",
                 "custom_adapters": [],
@@ -913,7 +913,7 @@
             },
             {
                 "compute_id": "local",
-                "console": 5006,
+                "console": 5021,
                 "console_auto_start": false,
                 "console_type": "none",
                 "custom_adapters": [],
@@ -993,7 +993,7 @@
             },
             {
                 "compute_id": "local",
-                "console": 5007,
+                "console": 5022,
                 "console_auto_start": false,
                 "console_type": "none",
                 "custom_adapters": [],
@@ -1073,7 +1073,7 @@
             },
             {
                 "compute_id": "local",
-                "console": 5008,
+                "console": 5023,
                 "console_auto_start": false,
                 "console_type": "none",
                 "custom_adapters": [],
