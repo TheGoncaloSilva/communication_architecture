@@ -1,0 +1,1 @@
+Formatting '/home/goncalo/repos/communication_architecture/practical/class_8_9/VXLAN/project-files/qemu/caac18c3-4c90-4232-88b5-88dcb2a4b8bd/hda_disk.qcow2', fmt=qcow2 cluster_size=65536 extended_l2=off compression_type=zlib size=3221225472 backing_file=/home/goncalo/GNS3/images/QEMU/VyOS_1.4_latest.qcow2 backing_fmt=qcow2 lazy_refcounts=off refcount_bits=16
