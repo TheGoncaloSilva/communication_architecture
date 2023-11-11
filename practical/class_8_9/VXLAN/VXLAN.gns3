@@ -39,7 +39,7 @@
                 "drawing_id": "f4c22187-b3b1-43d1-883d-cd625acdd163",
                 "locked": false,
                 "rotation": 0,
-                "svg": "<svg width=\"158\" height=\"29\"><text font-family=\"TypeWriter\" font-size=\"10.0\" font-weight=\"bold\" fill=\"#000000\" fill-opacity=\"1.0\">192.0.2.0.10/24</text></svg>",
+                "svg": "<svg width=\"140\" height=\"29\"><text font-family=\"TypeWriter\" font-size=\"10.0\" font-weight=\"bold\" fill=\"#000000\" fill-opacity=\"1.0\">192.0.2.10/24</text></svg>",
                 "x": 55,
                 "y": -99,
                 "z": 2
@@ -67,8 +67,8 @@
                 "locked": false,
                 "rotation": 0,
                 "svg": "<svg width=\"205\" height=\"29\"><text font-family=\"TypeWriter\" font-size=\"10.0\" font-weight=\"bold\" fill=\"#000000\" fill-opacity=\"1.0\">vlan3: 10.3.3.100/24</text></svg>",
-                "x": -345,
-                "y": -452,
+                "x": -346,
+                "y": -449,
                 "z": 2
             },
             {
