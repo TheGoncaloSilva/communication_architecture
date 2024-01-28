@@ -37,7 +37,7 @@ The division of point-to-point networks can be viewed in the following table:
 | **16** | 10.1.0.60  | 10.1.0.61 - 10.1.0.62 | 10.1.0.63    | 33   |
 | ...          | ...        | ...                    | ...          | ...  |
 
-The division of loopback networks can be viewed in the following table:
+The division of loopback networks can be viewed in the following table (they all start after address 100):
 
 | Subnet       | Network IP | Usable Range | Mask |
 | ------------ | ---------- | ------------ | ---- |
@@ -159,9 +159,17 @@ commit
 save
 ```
 
+### Analysis
+
+With the system configured, networks are being exchanged throughout the system, making so that every router has access to and only to the interconnection networks. We can observe that in the following images, which show the **Lisbon** router *ip route* table and ospf neighbors:
+
+![Lisbon ip route table](./image/OSPF/ip_route_lisbon.png)
+
+![Lisbon OSPF neighbors](./image/OSPF/ospf_neighbors_lisbon.png)
+
 ## BGP
 
-All core-routers use the loopback interfaces to establish BGP connection (router-id) between them. This was done as to guarantee that if an interface was disconnected, BGP would still work, with the traffic being routed by another interface connected to the core-router.
+All routers use the loopback interfaces to establish BGP connection (router-id) between them. This was done as to guarantee that if an interface was disconnected, BGP would still work, with the traffic being routed by another interface connected to the core-router.
 Our BGP network structure relies on a **spine** and **leaf** architecture, with all core-routers interconnected (spines), establishing a *Full-mesh*. The remaining routers in each POP are leafs or **route-reflector-client**'s.
 
 Configuring BGP in the core-routers can be done the following way:
@@ -216,7 +224,7 @@ set protocols bgp peer-group core address-family ipv4-unicast nexthop-self
 set protocols bgp address-family ipv4-unicast redistribute ospf
 ```
 
-### Test configuration
+### Testing
 
 After using the above steps, use the following commands to check if the BGP neighbors are up and exchanging routing information:
 
@@ -227,6 +235,12 @@ show bgp summary
 # Check if all routes are appearing in the routing table
 Show ip routes
 ```
+
+### Analysis
+
+Having the system configured, IPV4 unicast routes exchanging should be working, between all the routers configured. The following image shows the `bgp summary` of **New York** router. In there we can see that the BGP connection is established and working between loopback interfaces, with router **RN1** (*leaf*) and the remaining core routers (*spines*)
+
+![New York BGP summary](./image/BGP/newYork_bgp_summary.png)
 
 # Layer 2 point-to-point (vxlan)
 
@@ -294,9 +308,21 @@ commit
 save
 ```
 
+## Analysis
+
+With the system configured, we made a `ping` test with Client LB *B1_10* VPC, to *B3_10* VPC, with addresses `10.9.1.1` and `10.9.1.3` respectively. The terminal output with the successful connection can be seen in the following image:
+
+![ping B1_10 to B3_10 terminal](./image/VXLAN/ping_B110_B310.png)
+
+To analyze the exchanged data, we set-up two Wireshark captures, one between **RN1** and **NewYork**, before the data is de-capsulated by **RN1** and another between **RA1** and **LA_S2** switch, so that the VXLAN original traffic can be seen
+
+![RN1 NewYork capture](./image/VXLAN/ping_B110_B310_RN1_NewYork.png)
+
+![RA1 LA_S2 capture](./image/VXLAN/ping_B110_B310_RA1_LBS2.png)
+
 # VXLAN Bandwidth reservation and usage/routing
 
-To fulfill the requisite demanded by client LB of 10 Mbps of guaranteed bandwidth and priority, we started created a MPLS traffic-eng tunnel between New York and Aveiro. This tunnel is used so that any VXLAN traffic by Client LB is routed with priority through it. Naturally this also requires configurations on the remaining routers to be able to communicate traffic engineering information.
+To fulfill the requirement demanded by client LB of 10 Mbps of guaranteed bandwidth and priority, we started by creating an MPLS traffic-eng tunnel between New York and Aveiro. This tunnel is used so that any VXLAN traffic by Client LB is routed with priority through it. Naturally this also requires configurations on the remaining routers to be able to communicate traffic engineering information.
 
 ## Initial configuration in core-routers
 
@@ -365,13 +391,17 @@ ip policy route-map routeXPRESS
 
 ## Testing
 
-Having the system configured above, the following commands can be used to debug if the tunnel is established and working:
+The following commands can be used to debug if the tunnel is established and working:
 
 ```bash
 show mpls forwarding
 # Next command should show ...Oper: Up...
 show mpls traffic-eng tunnels
 ```
+
+## Analysis
+
+![Ping B1_10 to B3_10 routing through tunnel Aveiro New York](./image/RSVP/ping_B110_B310_Aveiro_NewYork.png)
 
 # L2-VPN
 
@@ -427,6 +457,10 @@ set interfaces bridge br101 description 'VLAN101'
 set interfaces bridge br101 member interface ethN
 set interfaces bridge br101 member interface vxlan101
 ```
+
+## Analysis
+
+
 
 # MPLS Layer 3 VPN
 
