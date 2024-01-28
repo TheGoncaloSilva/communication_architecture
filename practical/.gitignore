@@ -13,6 +13,7 @@
 
 # Others
 router_images/*
+.vscode
 
 # Gns3 projects
 #class_1/intro/*
@@ -20,7 +21,9 @@ router_images/*
 
 # Ignore all files and directories except *.gns3 and *.cfg files
 !.gitignore
-!/*.gns3
-!/*.cfg
-
+#!/*.gns3
+#!/*.cfg
+*_log.txt
+*_stdout.txt
+projeto_recurso/projeto_ac_recurso/*
 

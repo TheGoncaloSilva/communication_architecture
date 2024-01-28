@@ -1,0 +1,180 @@
+interfaces {
+    bridge br101 {
+        address 10.2.0.1/16
+        description VLAN101
+        member {
+            interface eth1 {
+            }
+            interface vxlan101 {
+            }
+        }
+    }
+    bridge br210 {
+        member {
+            interface eth2.10 {
+            }
+            interface vxlan110 {
+            }
+        }
+    }
+    bridge br220 {
+        member {
+            interface eth2.20 {
+            }
+            interface vxlan120 {
+            }
+        }
+    }
+    bridge br230 {
+        member {
+            interface eth2.30 {
+            }
+            interface vxlan130 {
+            }
+        }
+    }
+    dummy dum0 {
+        address 10.0.0.45/32
+    }
+    ethernet eth0 {
+        address 10.0.0.30/30
+        hw-id 0c:aa:f9:89:00:00
+    }
+    ethernet eth1 {
+        hw-id 0c:aa:f9:89:00:01
+    }
+    ethernet eth2 {
+        hw-id 0c:aa:f9:89:00:02
+        vif 10 {
+        }
+        vif 20 {
+        }
+        vif 30 {
+        }
+    }
+    ethernet eth3 {
+        hw-id 0c:aa:f9:89:00:03
+    }
+    ethernet eth4 {
+        hw-id 0c:aa:f9:89:00:04
+    }
+    ethernet eth5 {
+        hw-id 0c:aa:f9:89:00:05
+    }
+    loopback lo {
+    }
+    vxlan vxlan101 {
+        mtu 1500
+        source-address 10.0.0.45
+        vni 101
+    }
+    vxlan vxlan110 {
+        mtu 1500
+        remote 10.0.0.26
+        vni 110
+    }
+    vxlan vxlan120 {
+        mtu 1500
+        remote 10.0.0.26
+        vni 120
+    }
+    vxlan vxlan130 {
+        mtu 1500
+        remote 10.0.0.26
+        vni 130
+    }
+}
+protocols {
+    bgp {
+        address-family {
+            ipv4-unicast {
+                network 10.0.0.45/32 {
+                }
+            }
+            l2vpn-evpn {
+                advertise-all-vni
+            }
+        }
+        neighbor 10.0.0.29 {
+            peer-group core
+        }
+        neighbor 10.0.0.46 {
+            peer-group evpn
+        }
+        parameters {
+            router-id 10.0.0.45
+        }
+        peer-group co {
+        }
+        peer-group core {
+            address-family {
+                ipv4-unicast {
+                    nexthop-self {
+                    }
+                }
+            }
+            remote-as 33900
+            update-source eth0
+        }
+        peer-group evpn {
+            address-family {
+                l2vpn-evpn {
+                    nexthop-self {
+                    }
+                }
+            }
+            remote-as 33900
+            update-source dum0
+        }
+        system-as 33900
+    }
+}
+system {
+    config-management {
+        commit-revisions 100
+    }
+    conntrack {
+        modules {
+            ftp
+            h323
+            nfs
+            pptp
+            sip
+            sqlnet
+            tftp
+        }
+    }
+    console {
+        device ttyS0 {
+            speed 115200
+        }
+    }
+    host-name RN1
+    login {
+        user vyos {
+            authentication {
+                encrypted-password ****************
+                plaintext-password ****************
+            }
+        }
+    }
+    ntp {
+        server time1.vyos.net {
+        }
+        server time2.vyos.net {
+        }
+        server time3.vyos.net {
+        }
+    }
+    syslog {
+        global {
+            facility all {
+                level info
+            }
+            facility protocols {
+                level debug
+            }
+        }
+    }
+}
+
