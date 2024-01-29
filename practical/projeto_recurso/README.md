@@ -658,12 +658,42 @@ ip domain lookup
 
 # DNS Server
 
-Since we were using QEMU before for the VyOS images, we'll be continuing to use it. In GNS3 add the debian `labcom` machine with VNC as the viewer. Then to be able to view the terminal, download a VNC viewer, like `xtightvncviewer`, with the following commands:
+Using Qemu and `labcom`, we started by defining the GeoLocation of the respective IP addresses associated to the PoP. The ACL list is as follows:
 
 ```bash
-sudo apt install -y libvirt-clients libvirt-daemon-system virtinst xtightvncviewer apt-transport-https ca-certificates curl gnupg2 software-properties-common
+acl Aveiro {
+	10.9.1.0/24;
+};
+
+acl Lisbon {
+	10.9.2.0/24;
+};
+
+acl Madrid {
+	10.9.3.0/24;
+};
 ```
 
-After opening and starting the VM, we need to create a network interface. Follow the next commands:
+This file should be named `GeoIP.acl` and present in the directory `/etc/bind/`.
+
+Next, create bind the ip address and gateway to the connection:
 
 ```bash
+# Bind the ip address to the ens3 interface
+sudo ip addr add 10.1.0.33/30 dev ens3
+# Assign a gateway
+sudo ip route add default via 10.1.0.34
+```
+
+```bash
+named-checkzone cdnrus.com /etc/bind/cdnrus.com.db
+```
+
+In **RM1**, **RL2** and **RA2**:
+```bash
+# Add a default route from the VPN-1 to core-router using the global 
+#  routing table to find the next-hop
+ip route vrf VPN-1 0.0.0.0 0.0.0.0 <coreRouter_interface_ip> global
+```
+
+Não são configuradas rotas de volta estáticas para não estragar a rede
