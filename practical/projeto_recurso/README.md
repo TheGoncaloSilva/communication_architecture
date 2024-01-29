@@ -333,6 +333,8 @@ To analyze the exchanged data, we set-up two Wireshark captures, one between **R
 
 ![RA1 LA_S2 capture](./image/VXLAN/ping_B110_B310_RA1_LBS2.png)
 
+As we can see *ICMP* packets are encapsulated in **UDP** packets, operating in port 8472. This port isn't the standard 4789, because it's the standard designated by VyOS. Analyzing, we can also see the 802.1Q  VLAN tag ID present in the de-capsulated *ICMP* packet, in this case it's **VLAN 10**
+
 # VXLAN Bandwidth reservation and usage/routing
 
 To fulfill the requirement demanded by client LB of 10 Mbps of guaranteed bandwidth and priority, we started by creating an MPLS traffic-eng tunnel between New York and Aveiro. This tunnel is used so that any VXLAN traffic by Client LB is routed with priority through it. Naturally this also requires configurations on the remaining routers to be able to communicate traffic engineering information.
@@ -422,7 +424,19 @@ show mpls traffic-eng tunnels brief
 
 ## Analysis
 
+The following image contains the forwarding labels and Pop actions present in **Aveiro** router:
+
+![MPLS forwarding labels in Router Aveiro](./image/RSVP/mpls_forwarding_aveiro.png)
+
+After setting up the system, we check the status of the tunnels, as present in the following image, which shows that they are operating since `oper` is `up`:
+
+![MPLS traffic-eng tunnels status in Router Aveiro](./image/RSVP/mpls_trafficEng_tunnels_aveiro.png)
+
+As executed above, we made a `ping` test with Client LB *B1_10* VPC, to *B3_10* VPC, with addresses `10.9.1.1` and `10.9.1.3` respectively, then place a Wireshark capture between routers **NewYork** and **Aveiro**. The result of this capture can be seen below:
+
 ![Ping B1_10 to B3_10 routing through tunnel Aveiro New York](./image/RSVP/ping_B110_B310_Aveiro_NewYork.png)
+
+In this capture, we can see that the **UDP** **VxLAN** packet operating in port 8472 is being routed by the *MPLS* tunnel traffic-eng tunnel.
 
 # L2-VPN
 
@@ -438,7 +452,7 @@ The routers handling **L2-VPN** can't be Cisco C7200, because this ones don't su
 From the base network configuration, we stated that VyOS routers located in the POP's establish BGP *ipv4 unicast* exchange with core-routers. However, in this case they need to establish BGP connection between themselves, as to exchange *l2vpn* data.
 Using the previous configuration with `peer-group core` is easy to now establish a new peer-group to communicate over **EVPN**.
 
-In the topology of this network, the **RL1** is the Spine router, while **RA1** and **RN1** are Leafs or *route-reflector-client*'s. To configure the l2vpn address-family, in this topology, use the following commands:
+In the topology of this network, the **RL1** is the Spine router, while **RA1** and **RN1** are Leafs or *route-reflector-client*'s. To configure the *l2vpn address-family*, in this topology, use the following commands:
 
 ```bash
 # The following two configs. were already done before
@@ -481,11 +495,20 @@ set interfaces bridge br101 member interface vxlan101
 
 ## Analysis
 
+The following captures demonstrate a `ping` test made between VPCs *a1_1* and *a2_1*, with addresses `10.7.1.1` and `10.7.2.1`, respectively. The result was successful and the terminal output can be seen in the following image:
+
+![ping a1_1 to a2_1 terminal output](./image/L2VPN/ping_a11_a21_terminal.png)
+
+A packet capture was placed using Wireshark, between **Lisbon** and **RL1**, where the data is still encapsulated in **UDP** packets, with port 8472 and another capture between router **RA1** and Switch **LA_S3**, where the *ICMP* packets originate, before being encapsulated.
+
+![capture a1_1 to a2_1 on Lisbon to RL1](./image/L2VPN/ping_a11_a21_Lisbon_RL1.png)
+
+![capture a1_1 to a2_1 on RA1 to LA_S3](./image/L2VPN/ping_a11_a21_RA1_LAS3.png)
 
 
 # MPLS Layer 3 VPN
 
-In terms of MPLS Layer 3 VPN, this one is configured to provide connectivity and address SMEx client needs. For that, the respective VPC's needed to be configured, as well as the core-routers and POP routers connected to the network.
+In terms of MPLS Layer 3 VPN, this one is configured to provide connectivity and address SMEx client needs, all while keeping an isolated virtual routing table. For that, the respective VPC's needed to be configured, as well as the core-routers and POP routers connected to the network.
 
 ## Terminals
 
@@ -500,28 +523,28 @@ no sh
 
 ## Core-Routers
 
-In the core-routers, mpls needs to be enable in each interface to other core routers and to router **RM1**, **RA2** or **RL2**. Use the following command:
+In the core-routers, mpls needs to be enabled in each interface to other core routers and to router **RM1**, **RA2** or **RL2**. Use the following command:
 
 ```bash
 interface <interface-type>/<interface-number>
 mpls ip
 ```
 
-The router's BGP also needs to be configured to handle `address-family vpnv4`. The following commands can be used:
+In our case, core-routers continue to establish OSPF and BGP IPV4 connection with this routers, for route exchange, however, they are still *leafs*.
+
+## PoP-Routers
+
+The POP routers addressed in this subsection are **RM1**, **RA2** and **RL2**. They need to be configured to handle `address-family vpnv4`. The following commands can be used:
 
 ```bash
 router bgp 33900
 address-family vpnv4
+# Use the router-ids of the other routers
 neighbor <pop_router_ip> activate
-neighbor <pop_router_ip>send-community both
-neighbor <pop_router_ip> route-reflector-client
+neighbor <pop_router_ip> send-community both
 ```
 
-## PoP-Routers
-
-The POP routers addressed in this subsection are **RM1**, **RA2** and **RL2**.
-
-**Configurar aqui o vpnv4
+In this connection, no route-reflector is used, because there are only 3 routers and this way, we can improve redundancy where if one of the routers fail, the others can still communicate effectively, without having one which can't fail.
 
 ### Configure VRF
 
@@ -559,20 +582,22 @@ Check previous router configuration (`show run`) and execute the necessary follo
 ```bash
 router bgp 33900
 
+# Configure router id, if not before
+bgp router-id <loopback_ip>
+
 # Add core router as neighbor
-neighbor <coreRouter_neighbor> remote-as 33900
+neighbor <neighbor_id> remote-as 33900
+neighbor <neighbor_id> update-source l0
 
 # Configure IPV4 route address-family
 address-family ipv4
-# If the following command fails, don't worry, ignore it to use in the next section
-network <SMEx_network_address> mask 255.255.255.0
 neighbor <coreRouter_neighbor> activate
 exit
 
 # Configure vpnv4 route address-family
 address-family vpnv4
-neighbor <coreRouter_neighbor> activate
-neighbor <coreRouter_neighbor> send-community both
+neighbor <pop_router_target_ip> activate
+neighbor <pop_router_target_ip> send-community both
 exit
 
 # enable vrf
@@ -581,7 +606,7 @@ redistribute connected
 exit
 ```
 
-### Debugging
+## Debugging
 
 Until now, the router has two separate routing table which are isolated from each other. This can be observed by executing two commands:
 
@@ -589,3 +614,23 @@ Until now, the router has two separate routing table which are isolated from eac
 show ip route # Should only appear the interconnection networks
 show ip route vrf VPN-1 # should only appear the SME networks
 ```
+
+## Analysis
+
+After configuring our system, we conducted a `ping` test between terminals `S3_1` and `S2_1`, which have the respective ip address `10.9.3.1` and `10.9.2.1`. The terminal output and connectivity of this test can be seen the following image:
+
+![ping S3_1 to S2_1 terminal output](./image/MPLS/ping_s31_s21_terminal.png)
+
+To analyze the traffic, we configured Wireshark packet capture between routers **RL2** and **Lisbon**, before the traffic arrived at the destination router at the edge of the client network and between router **RM1** and Switch **S3_S1**, capturing the originating *ICMP* packets.
+
+![capture S3_1 to S2_1 on RL2 to Lisbon](./image/MPLS/ping_S31_S21_RL2_Lisbon.png)
+
+![capture S3_1 to S2_1 on RM1 to S3_S1](./image/MPLS/ping_S31_S21_RM1_S3_S1.png)
+
+In this packets, we can see that the packets are forwarded through the networks using the **MPLS** protocol, operating in Layer 3.
+
+The following images also show the terminal of **RM1** router, where it's possible to see the `ip route` of the psychical routing table and virtual `vrf VPN-1` routing table, where the physical table only contains the interconnection network and the virtual only the client **SME** networks. This way the client get's an isolated routing table.
+
+![ip route table of RM1](./image/MPLS)
+
+![ip route vrf VPN-1 of RM1](./image/MPLS)
