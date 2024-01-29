@@ -1,0 +1,160 @@
+!
+
+!
+! Last configuration change at 21:07:35 UTC Mon Jan 29 2024
+upgrade fpd auto
+version 15.1
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname RM1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+ip source-route
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+ip vrf VPN-1
+ rd 200:1
+ route-target export 200:1
+ route-target import 200:1
+!
+!
+!
+no ip domain lookup
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+crypto pki token default removal timeout 0
+!
+!
+!
+redundancy
+!
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 10.1.0.110 255.255.255.255
+ ip ospf 1 area 0
+!
+interface FastEthernet0/0
+ ip address 10.1.0.38 255.255.255.252
+ ip ospf 1 area 0
+ duplex auto
+ speed auto
+ mpls ip
+!
+interface FastEthernet0/1
+ ip vrf forwarding VPN-1
+ ip address 10.9.3.254 255.255.255.0
+ duplex auto
+ speed auto
+!
+interface FastEthernet1/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface FastEthernet1/1
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+router ospf 1
+ router-id 10.1.0.110
+!
+router bgp 33900
+ bgp router-id 10.1.0.110
+ bgp log-neighbor-changes
+ neighbor 10.1.0.102 remote-as 33900
+ neighbor 10.1.0.102 update-source Loopback0
+ neighbor 10.1.0.106 remote-as 33900
+ neighbor 10.1.0.106 update-source Loopback0
+ neighbor 10.1.0.109 remote-as 33900
+ neighbor 10.1.0.109 update-source Loopback0
+ !
+ address-family ipv4
+  redistribute ospf 1
+  neighbor 10.1.0.102 activate
+  neighbor 10.1.0.106 activate
+  neighbor 10.1.0.109 activate
+ exit-address-family
+ !
+ address-family vpnv4
+  neighbor 10.1.0.102 activate
+  neighbor 10.1.0.102 send-community both
+  neighbor 10.1.0.109 activate
+  neighbor 10.1.0.109 send-community both
+ exit-address-family
+ !
+ address-family ipv4 vrf VPN-1
+  redistribute connected
+ exit-address-family
+!
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+!
+!
+ip route vrf VPN-1 0.0.0.0 0.0.0.0 10.1.0.37 global
+!
+no cdp log mismatch duplex
+!
+!
+!
+!
+!
+!
+control-plane
+!
+!
+!
+mgcp profile default
+!
+!
+!
+gatekeeper
+ shutdown
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+ transport input all
+!
+end

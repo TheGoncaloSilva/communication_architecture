@@ -1,0 +1,156 @@
+!
+!
+!
+!
+
+!
+! Last configuration change at 22:02:38 UTC Sat Jan 27 2024
+upgrade fpd auto
+version 15.1
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname Madrid
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+ip source-route
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+!
+no ip domain lookup
+no ipv6 cef
+!
+multilink bundle-name authenticated
+mpls traffic-eng tunnels
+!
+!
+!
+!
+!
+!
+!
+crypto pki token default removal timeout 0
+!
+!
+!
+redundancy
+!
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 10.1.0.106 255.255.255.255
+ ip ospf 1 area 0
+!
+interface FastEthernet0/0
+ ip address 10.1.0.14 255.255.255.252
+ ip ospf 1 area 0
+ duplex auto
+ speed auto
+ mpls traffic-eng tunnels
+ mpls ip
+ ip rsvp bandwidth 10000
+!
+interface FastEthernet0/1
+ ip address 10.1.0.6 255.255.255.252
+ ip ospf 1 area 0
+ duplex auto
+ speed auto
+ mpls traffic-eng tunnels
+ mpls ip
+ ip rsvp bandwidth 10000
+!
+interface FastEthernet1/0
+ ip address 10.1.0.37 255.255.255.252
+ ip ospf 1 area 0
+ duplex auto
+ speed auto
+ mpls ip
+!
+interface FastEthernet1/1
+ ip address 10.1.0.34 255.255.255.252
+ ip ospf 1 area 0
+ duplex auto
+ speed auto
+!
+router ospf 1
+ router-id 10.1.0.106
+!
+router bgp 33900
+ bgp router-id 10.1.0.106
+ bgp log-neighbor-changes
+ neighbor 10.1.0.104 remote-as 33900
+ neighbor 10.1.0.104 update-source Loopback0
+ neighbor 10.1.0.105 remote-as 33900
+ neighbor 10.1.0.105 update-source Loopback0
+ neighbor 10.1.0.107 remote-as 33900
+ neighbor 10.1.0.107 update-source Loopback0
+ neighbor 10.1.0.110 remote-as 33900
+ !
+ address-family ipv4
+  redistribute ospf 1
+  neighbor 10.1.0.104 activate
+  neighbor 10.1.0.105 activate
+  neighbor 10.1.0.107 activate
+  neighbor 10.1.0.110 activate
+  neighbor 10.1.0.110 route-reflector-client
+ exit-address-family
+!
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+!
+!
+!
+no cdp log mismatch duplex
+!
+!
+!
+!
+!
+!
+control-plane
+!
+!
+!
+mgcp profile default
+!
+!
+!
+gatekeeper
+ shutdown
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+ transport input all
+!
+end

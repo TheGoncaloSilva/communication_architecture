@@ -1,0 +1,147 @@
+interfaces {
+    bridge br101 {
+        address 10.7.2.254/16
+        description VLAN101
+        member {
+            interface eth1 {
+            }
+            interface vxlan101 {
+            }
+        }
+    }
+    dummy dum0 {
+        address 10.1.0.103/32
+    }
+    ethernet eth0 {
+        hw-id 0c:24:b4:be:00:00
+    }
+    ethernet eth1 {
+        hw-id 0c:24:b4:be:00:01
+    }
+    ethernet eth2 {
+        hw-id 0c:24:b4:be:00:02
+    }
+    ethernet eth3 {
+        hw-id 0c:24:b4:be:00:03
+    }
+    ethernet eth4 {
+        hw-id 0c:24:b4:be:00:04
+    }
+    ethernet eth5 {
+        address 10.1.0.30/30
+        hw-id 0c:24:b4:be:00:05
+    }
+    loopback lo {
+    }
+    vxlan vxlan101 {
+        mtu 1500
+        source-address 10.1.0.103
+        vni 101
+    }
+}
+protocols {
+    bgp {
+        address-family {
+            ipv4-unicast {
+                redistribute {
+                    ospf {
+                    }
+                }
+            }
+            l2vpn-evpn {
+                advertise-all-vni
+            }
+        }
+        neighbor 10.1.0.101 {
+            peer-group evpn
+        }
+        neighbor 10.1.0.104 {
+            peer-group core
+        }
+        neighbor 10.1.0.108 {
+            peer-group evpn
+        }
+        parameters {
+            router-id 10.1.0.103
+        }
+        peer-group core {
+            address-family {
+                ipv4-unicast {
+                    nexthop-self {
+                    }
+                }
+            }
+            remote-as 33900
+            update-source dum0
+        }
+        peer-group evpn {
+            address-family {
+                l2vpn-evpn {
+                    nexthop-self {
+                    }
+                    route-reflector-client
+                }
+            }
+            remote-as 33900
+            update-source dum0
+        }
+        system-as 33900
+    }
+    ospf {
+        area 0 {
+            network 10.1.0.28/30
+            network 10.1.0.103/32
+        }
+        parameters {
+            router-id 10.1.0.103
+        }
+    }
+}
+system {
+    config-management {
+        commit-revisions 100
+    }
+    conntrack {
+        modules {
+            ftp
+            h323
+            nfs
+            pptp
+            sip
+            sqlnet
+            tftp
+        }
+    }
+    console {
+        device ttyS0 {
+            speed 115200
+        }
+    }
+    host-name RL1
+    login {
+        user vyos {
+            authentication {
+                encrypted-password ****************
+                plaintext-password ****************
+            }
+        }
+    }
+    ntp {
+        server time1.vyos.net {
+        }
+        server time2.vyos.net {
+        }
+        server time3.vyos.net {
+        }
+    }
+    syslog {
+        global {
+            facility all {
+                level info
+            }
+            facility protocols {
+                level debug
+            }
+        }
+    }
+}
