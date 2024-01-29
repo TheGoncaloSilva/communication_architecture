@@ -29,12 +29,12 @@ The division of point-to-point networks can be viewed in the following table:
 | 8            | 10.1.0.28  | 10.1.0.29 - 10.1.0.30  | 10.1.0.31    | 30   |
 | 9            | 10.1.0.32  | 10.1.0.33 - 10.1.0.34  | 10.1.0.35    | 30   |
 | 10           | 10.1.0.36  | 10.1.0.37 - 10.1.0.38  | 10.1.0.39    | 30   |
-| 11           | 10.1.0.40  | 10.1.0.41 - 10.1.0.42 | 10.1.0.43    | 32   |
-| 12           | 10.1.0.44  | 10.1.0.45 - 10.1.0.46 | 10.1.0.47    | 32   |
-| **13** | 10.1.0.48  | 10.1.0.49 - 10.1.0.50 | 10.1.0.51    | 32   |
-| **14** | 10.1.0.52  | 10.1.0.53 - 10.1.0.54 | 10.1.0.55    | 32   |
-| **15** | 10.1.0.56  | 10.1.0.57 - 10.1.0.58 | 10.1.0.59    | 32   |
-| **16** | 10.1.0.60  | 10.1.0.61 - 10.1.0.62 | 10.1.0.63    | 33   |
+| 11           | 10.1.0.40  | 10.1.0.41 - 10.1.0.42  | 10.1.0.43    | 32   |
+| 12           | 10.1.0.44  | 10.1.0.45 - 10.1.0.46  | 10.1.0.47    | 32   |
+| **13**       | 10.1.0.48  | 10.1.0.49 - 10.1.0.50  | 10.1.0.51    | 32   |
+| **14**       | 10.1.0.52  | 10.1.0.53 - 10.1.0.54  | 10.1.0.55    | 32   |
+| **15**       | 10.1.0.56  | 10.1.0.57 - 10.1.0.58  | 10.1.0.59    | 32   |
+| **16**       | 10.1.0.60  | 10.1.0.61 - 10.1.0.62  | 10.1.0.63    | 33   |
 | ...          | ...        | ...                    | ...          | ...  |
 
 The division of loopback networks can be viewed in the following table (they all start after address 100):
@@ -51,7 +51,9 @@ The division of loopback networks can be viewed in the following table (they all
 | 8            | 10.1.0.108 | 10.1.0.108   | 32   |
 | 9            | 10.1.0.109 | 10.1.0.109   | 32   |
 | 10           | 10.1.0.110 | 10.1.0.110   | 32   |
-| **11** | 10.1.0.111 | 10.1.0.111   | 32   |
+| 11           | 10.1.0.111 | 10.1.0.111   | 32   |
+| 12           | 10.1.0.112 | 10.1.0.112   | 32   |
+| **13**       | 10.1.0.113 | 10.1.0.113   | 32   |
 | ...          | ...        | ...          | ...  |
 
 # Configuring the network
@@ -258,7 +260,18 @@ Each switch is connected to three VPC's in different VXLAN's. Their connection w
 
 ## VyOS
 
-At the VyOS routers configure sub-interfaces for VLAN 10, 20 and 30 using the following commands:
+At the VyOS routers start by creating a new loopback interface l1 and add it to OSPF only used to carry VXLAN traffic:
+
+```bash
+configure
+# Loopback/dummy interfaces need to be named dumN
+set interfaces dummy dum1 address <ip_address>/<maks>
+set protocols ospf area 0 network <network-IP>/<subnet-mask>
+commit
+``` 
+
+
+configure sub-interfaces for VLAN 10, 20 and 30 using the following commands:
 
 ```bash
 configure
@@ -276,15 +289,15 @@ Create three VXLAN connections between the VyOS, to carry data for each LAN:
 ```bash
 set interfaces vxlan vxlan110 vni 110
 set interfaces vxlan vxlan110 mtu 1500
-set interfaces vxlan vxlan110 remote <remoteRouter_loopback_ip>
+set interfaces vxlan vxlan110 remote <remoteRouter_loopback_l1_ip>
 
 set interfaces vxlan vxlan120 vni 120
 set interfaces vxlan vxlan120 mtu 1500
-set interfaces vxlan vxlan120 remote <remoteRouter_loopback_ip>
+set interfaces vxlan vxlan120 remote <remoteRouter_loopback_l1_ip>
 
 set interfaces vxlan vxlan130 vni 130
 set interfaces vxlan vxlan130 mtu 1500
-set interfaces vxlan vxlan130 remote <remoteRouter_loopback_ip>
+set interfaces vxlan vxlan130 remote <remoteRouter_loopback_l1_ip>
 
 commit
 save
@@ -350,6 +363,8 @@ tunnel source Loopback0
 # target should be loopback of New York or Aveiro routers
 tunnel destination <loopback_target-ip>
 tunnel mode mpls traffic-eng
+# announce the tunnel to the routing table
+#tunnel mpls traffic-eng autoroute announce
 tunnel mpls traffic-eng priority 7 7
 tunnel mpls traffic-eng bandwidth 10000
 tunnel mpls traffic-eng path-option 1 dynamic # use dynamic routing
@@ -367,11 +382,11 @@ mpls traffic-eng area 0
 
 Since dynamic routing of traffic was opted, using *Access-control lists* and *route-maps* is possible to isolate client LB traffic from other traffic flows, ensuring that their data is routed by the tunnel.
 
-First we need to create the *access-list* 100 to allow traffic coming from **RN1** to **RA1** and vice-versa. Since client LB only uses VXLAN, which in VyOS uses the port **8472**, makes the rule easier to configure. Use The following commands to create the *access-list*:
+First we need to create the *access-list* 100 to allow traffic coming from **RN1** to **RA1** and vice-versa. Since client LB only uses VXLAN, which in VyOS uses the port **8472**, makes the rule easier to configure. Since we also divided the VxLAN and L2VPN in one using dum1 and the other dum0 respectively, it's easier to filter the data now, by using the correct dummy interface. Use The following commands to create the *access-list*:
 
 ```bash
 # source and dest ip should be RN1 interface to core and RA1 loopback or vice-versa
-access-list 100 permit udp host <source_ip> host <dest_ip> eq 8472
+access-list 100 permit udp host <source_ip> host <dest__dum1_ip> eq 8472
 ```
 
 Next, a *route-map* is needed to filter the traffic and see which applies to the *access-list*. For that, we created the **routeXPRESS** which will *match* the traffic to the **ACL 100** and forward them to *Tunnel 1*. Use the following commands:
@@ -395,8 +410,14 @@ The following commands can be used to debug if the tunnel is established and wor
 
 ```bash
 show mpls forwarding
+show ip interface brief
 # Next command should show ...Oper: Up...
 show mpls traffic-eng tunnels
+show access-list 100
+show route-map routeXPRESS
+show interface tunnel1
+# See tunnel path
+show mpls traffic-eng tunnels brief
 ```
 
 ## Analysis
