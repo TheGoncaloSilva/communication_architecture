@@ -631,6 +631,39 @@ In this packets, we can see that the packets are forwarded through the networks 
 
 The following images also show the terminal of **RM1** router, where it's possible to see the `ip route` of the psychical routing table and virtual `vrf VPN-1` routing table, where the physical table only contains the interconnection network and the virtual only the client **SME** networks. This way the client get's an isolated routing table.
 
-![ip route table of RM1](./image/MPLS)
+![ip route table of RM1](./image/MPLS/RM1_globa_routing_table.png)
 
-![ip route vrf VPN-1 of RM1](./image/MPLS)
+![ip route vrf VPN-1 of RM1](./image/MPLS/RM1_virtual_vpn1_table.png)
+
+# Geographic based service routing
+
+This section will attend to client SMEx needs of geographic based service routing for its servers/services. In practice this translates to a DNS server located in main DC which will be the target of client requests and supply them with a dummy or the gateway IP address associated to their respective PoP.
+
+# Terminals
+
+For increased reliability with DNS requests, we'll be using Cisco C7200 routers as the client (already configured in MPLS section), with routing disabled. To configure the terminal routers, use the following commands:
+
+```bash
+# Already done before
+no ip routing
+ip default-gateway <gateway_ip>
+int <interface-type>/<interface-number>
+ip address <ip_address> <mask>
+no shutdown
+
+# New commands
+ip name-server 10.1.0.33
+ip domain lookup
+```
+
+# DNS Server
+
+Since we were using QEMU before for the VyOS images, we'll be continuing to use it. In GNS3 add the debian `labcom` machine with VNC as the viewer. Then to be able to view the terminal, download a VNC viewer, like `xtightvncviewer`, with the following commands:
+
+```bash
+sudo apt install -y libvirt-clients libvirt-daemon-system virtinst xtightvncviewer apt-transport-https ca-certificates curl gnupg2 software-properties-common
+```
+
+After opening and starting the VM, we need to create a network interface. Follow the next commands:
+
+```bash
