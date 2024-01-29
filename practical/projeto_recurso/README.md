@@ -639,7 +639,7 @@ The following images also show the terminal of **RM1** router, where it's possib
 
 This section will attend to client SMEx needs of geographic based service routing for its servers/services. In practice this translates to a DNS server located in main DC which will be the target of client requests and supply them with a dummy or the gateway IP address associated to their respective PoP.
 
-# Terminals
+## Terminals
 
 For increased reliability with DNS requests, we'll be using Cisco C7200 routers as the client (already configured in MPLS section), with routing disabled. To configure the terminal routers, use the following commands:
 
@@ -656,7 +656,7 @@ ip name-server 10.1.0.33
 ip domain lookup
 ```
 
-# DNS Server
+## DNS Server
 
 Using Qemu and `labcom`, we started by defining the GeoLocation of the respective IP addresses associated to the PoP. The ACL list is as follows:
 
@@ -674,9 +674,7 @@ acl Madrid {
 };
 ```
 
-This file should be named `GeoIP.acl` and present in the directory `/etc/bind/`.
-
-Next, create bind the ip address and gateway to the connection:
+This file should be named `GeoIP.acl` and present in the directory `/etc/bind/`. Next, create bind the ip address and gateway to the connection:
 
 ```bash
 # Bind the ip address to the ens3 interface
@@ -685,15 +683,72 @@ sudo ip addr add 10.1.0.33/30 dev ens3
 sudo ip route add default via 10.1.0.34
 ```
 
+On the DNS server, load the **ACL** file to *BIND* the configuration by adding the following line to `/etc/bind/named.conf` (If present, comment the line `include “/etc/bind/named.conf.default-zones”;`):
 ```bash
-named-checkzone cdnrus.com /etc/bind/cdnrus.com.db
+include “/etc/bind/GeoIP.acl”;
 ```
 
-In **RM1**, **RL2** and **RA2**:
+The file will have the following structure:
+
+![named.conf file](./image/DNS/named_conf.png)
+
+Then restart the DNS server with the command:
+```bash
+service bind9 restart or systemctl restart bind9.
+# check it's status
+service bind9 status 
+systemctl status bind9
+```
+
+Modify file `/etc/bind/named.conf.local` by creating the definition of *zones* conditioned by *views*, dependent on the geographic location obtained from the **ACL**. The additions are present in the following image:
+
+![named.conf.local file](./image/DNS/named_conf_local.png)
+
+To create the IP addresses of the servers present in each location, we created one `.db` file for each location and another for open access. In our case, since we don't have a dedicated copy server (not in scope), we just simply returned the address of the gateway present in this network. In the following images, we have present the configuration of each file:
+
+* DNS database file of Aveiro SME1 network:
+    ![dns db aveiro](./image/DNS/dns_db_aveiro.png)
+
+* DNS database file of Lisbon SME2 network:
+    ![dns db lisbon](./image/DNS/dns_db_lisbon.png)
+
+* DNS database file of Madrid SME3 network:
+    ![dns db madrid](./image/DNS/dns_db_madrid.png)
+
+* DNS database file for any access:
+    ![dns db other](./image/DNS/dns_db_other.png)
+
+To check the successful configuration of the addresses, use the command:
+
+```bash
+named-checkzone cdnglobal.com /etc/bind/cdnglobal.com-<zone>.db
+```
+
+Finally, restart the server and the system is configured.
+
+## Other routers
+
+Since SMEx network operate in a MPLS Layer3 network with isolated routing, they can't natively access devices outside of their network. However, in this case, they need to access the DNS server in order to resolute the address of the website `cdnglobal.com`. For that, in routers **RM1**, **RL2** and **RA2**, a static default route needed to be created in the virtual routing table (`vrf VPN-1`) as to give the ability of this network to access the global physical routing table. The command used is as follows:
+
 ```bash
 # Add a default route from the VPN-1 to core-router using the global 
 #  routing table to find the next-hop
 ip route vrf VPN-1 0.0.0.0 0.0.0.0 <coreRouter_interface_ip> global
 ```
 
-Não são configuradas rotas de volta estáticas para não estragar a rede
+Since the scope of this sections was just to have the address resolved and seen by Wireshark, a return path wasn't configured, which means that the terminals are able to reach the **DNS** server, however, the server doesn't have the routes to their network, so they won't be able to see the resolution. Still, that resolution can be observed in the Wireshark packets as we'll be approaching in the next section. 
+
+Static routes from the global routing table to the virtual, distributed by OSPF could be configured ot solve this issue, however this would quickly prove to be a bad idea, because the SMEx networks would start to be seen as internal to the AS infrastructure, allowing other users or bad actors access. Of course other measures could be used, such as only allowing DNS traffic with **ACL**'s, or using another dedicated *VPN* to carry only traffic outside of the clients networks and back. This and other approaches could be used, however, as stated before this part of the work falls out-of-scope of this project.
+
+## Analysis
+
+To test the successful implementation of our DNS system, we performed a packet capture using Wireshark in the link between **Madrid** router and the **DNS** server. Next, we made a `ping` test to address `cdnglobal.com`, filtered by the **DNS** response packet and checked the `Answers` field, which contains the address returned by the **DNS** server. As present in the following images, our system performed as expected, returning the correct server address for all requests.
+
+* Test from Aveiro:
+    ![capture from Aveiro in Madrid to DNS link](./image/DNS/capture_Madrid_DNS_Aveiro.png)
+
+* Test from Lisbon:
+    ![capture from Lisbon in Madrid to DNS link](./image/DNS/capture_Madrid_DNS_Lisbon.png)
+
+* Test from Madrid:
+    ![capture from Madrid in Madrid to DNS link](./image/DNS/capture_Madrid_DNS_Madrid.png)
