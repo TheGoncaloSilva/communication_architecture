@@ -4,14 +4,14 @@
 !
 
 !
-! Last configuration change at 13:38:01 UTC Thu Sep 28 2023
+! Last configuration change at 22:02:38 UTC Sat Jan 27 2024
 upgrade fpd auto
 version 15.1
 service timestamps debug datetime msec
 service timestamps log datetime msec
 no service password-encryption
 !
-hostname R1
+hostname Madrid
 !
 boot-start-marker
 boot-end-marker
@@ -29,10 +29,10 @@ ip cef
 !
 !
 no ip domain lookup
-ipv6 unicast-routing
-ipv6 cef
+no ipv6 cef
 !
 multilink bundle-name authenticated
+mpls traffic-eng tunnels
 !
 !
 !
@@ -56,43 +56,62 @@ ip tcp synwait-time 5
 !
 !
 !
+interface Loopback0
+ ip address 10.1.0.106 255.255.255.255
+ ip ospf 1 area 0
+!
 interface FastEthernet0/0
- ip address 200.1.2.1 255.255.255.0
+ ip address 10.1.0.14 255.255.255.252
+ ip ospf 1 area 0
  duplex auto
  speed auto
- ipv6 address 2001:1:2::1/64
+ mpls traffic-eng tunnels
+ mpls ip
+ ip rsvp bandwidth 10000
 !
 interface FastEthernet0/1
- ip address 192.10.10.254 255.255.255.0
+ ip address 10.1.0.6 255.255.255.252
+ ip ospf 1 area 0
  duplex auto
  speed auto
+ mpls traffic-eng tunnels
+ mpls ip
+ ip rsvp bandwidth 10000
 !
 interface FastEthernet1/0
- no ip address
- shutdown
+ ip address 10.1.0.37 255.255.255.252
+ ip ospf 1 area 0
  duplex auto
  speed auto
+ mpls ip
 !
 interface FastEthernet1/1
- no ip address
- shutdown
+ ip address 10.1.0.34 255.255.255.252
+ ip ospf 1 area 0
  duplex auto
  speed auto
 !
-router bgp 1001
+router ospf 1
+ router-id 10.1.0.106
+!
+router bgp 33900
+ bgp router-id 10.1.0.106
  bgp log-neighbor-changes
- neighbor 2001:1:2::2 remote-as 1002
- neighbor 200.1.2.2 remote-as 1002
+ neighbor 10.1.0.104 remote-as 33900
+ neighbor 10.1.0.104 update-source Loopback0
+ neighbor 10.1.0.105 remote-as 33900
+ neighbor 10.1.0.105 update-source Loopback0
+ neighbor 10.1.0.107 remote-as 33900
+ neighbor 10.1.0.107 update-source Loopback0
+ neighbor 10.1.0.110 remote-as 33900
  !
  address-family ipv4
-  network 192.10.10.0
-  no neighbor 2001:1:2::2 activate
-  neighbor 200.1.2.2 activate
- exit-address-family
- !
- address-family ipv6
-  network 2001:10:10::/64
-  neighbor 2001:1:2::2 activate
+  redistribute ospf 1
+  neighbor 10.1.0.104 activate
+  neighbor 10.1.0.105 activate
+  neighbor 10.1.0.107 activate
+  neighbor 10.1.0.110 activate
+  neighbor 10.1.0.110 route-reflector-client
  exit-address-family
 !
 ip forward-protocol nd
